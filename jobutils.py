@@ -6,11 +6,8 @@
 This module adds jobcontrol related command line flags and job utilities.
 """
 import json
-from signac import job
+from signac.contrib import job
 from nemd import environutils
-import os
-import argparse
-
 
 RUN_NEMD = 'run_nemd'
 OUTFILE = 'outfile'
@@ -35,53 +32,6 @@ UNKNOWN_ARGS = 'unknown_args'
 FN_DOCUMENT = job.Job.FN_DOCUMENT
 TASK = 'task'
 AGGREGATOR = 'aggregator'
-
-def type_positive_int(arg):
-    value = type_int(arg)
-    if value < 1:
-        raise argparse.ArgumentTypeError(f'{value} is not a positive integer.')
-    return value
-
-def add_job_arguments(parser, arg_flags=None, jobname=None):
-    """
-    Add job control related flags.
-
-    :param parser: the parser to add arguments
-    :type parser: 'argparse.ArgumentParser'
-    :param arg_flags: specific job control related flags to add
-    :type arg_flags: list
-    :param jobname: the default jobname
-    :type jobname: str
-    """
-    if arg_flags is None:
-        arg_flags = [FLAG_INTERACTIVE, FLAG_JOBNAME, FLAG_DEBUG, FLAG_CPU]
-    # Workflow drivers may add the job control options a few times
-    arg_flags = [
-        x for x in arg_flags if x not in parser._option_string_actions
-    ]
-    if FLAG_INTERACTIVE in arg_flags:
-        parser.add_argument(FLAG_INTERACTIVE,
-                            dest=FLAG_INTERACTIVE[1:].lower(),
-                            action='store_true',
-                            help='Enable interactive mode')
-    if FLAG_JOBNAME in arg_flags:
-        parser.add_argument(
-            FLAG_JOBNAME,
-            dest=FLAG_JOBNAME[1:].lower(),
-            default=jobname,
-            help='The jobnamee based on which filenames are created.')
-    if FLAG_DEBUG in arg_flags:
-        parser.add_argument(
-            FLAG_DEBUG,
-            action='store_true',
-            dest=FLAG_DEBUG[1:].lower(),
-            help='Enable debug mode (e.g. extra printing and files)')
-    if FLAG_CPU in arg_flags:
-        parser.add_argument(FLAG_CPU,
-                            type=type_positive_int,
-                            dest=FLAG_CPU[1:].lower(),
-                            default=round(os.cpu_count() / 2),
-                            help='Number of CPU processors.')
 
 
 def get_arg(args, flag, val=None):
